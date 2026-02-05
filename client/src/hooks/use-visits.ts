@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api, buildUrl, type InsertVisit } from "@shared/routes";
+import { api, buildUrl } from "@shared/routes";
+import { type InsertVisit } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 
 export function useVisits(search?: string, status?: 'checked_in' | 'checked_out' | 'all') {
