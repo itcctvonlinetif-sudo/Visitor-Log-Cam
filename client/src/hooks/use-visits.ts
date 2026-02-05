@@ -81,6 +81,8 @@ export function useCheckoutVisit() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.visits.list.path] });
+      // Also invalidate with specific filters if they exist
+      queryClient.refetchQueries({ queryKey: [api.visits.list.path] });
       toast({
         title: "Checked Out",
         description: "Visitor has been successfully checked out",
