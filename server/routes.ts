@@ -31,6 +31,17 @@ export async function registerRoutes(
   app.post(api.visits.create.path, async (req, res) => {
     try {
       const data = insertVisitSchema.parse(req.body);
+      
+      // Check if RFID is already in use by a checked-in visitor
+      if (data.rfidCardId) {
+        const existingVisit = await storage.findVisitByRfid(data.rfidCardId);
+        if (existingVisit && existingVisit.status === 'checked_in') {
+          return res.status(400).json({ 
+            message: `RFID ${data.rfidCardId} is currently being used by ${existingVisit.fullName}. Please check them out first or use a different card.` 
+          });
+        }
+      }
+
       const visit = await storage.createVisit(data);
       res.status(201).json(visit);
     } catch (e) {
