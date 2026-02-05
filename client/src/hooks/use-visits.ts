@@ -1,0 +1,136 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api, buildUrl, type InsertVisit } from "@shared/routes";
+import { useToast } from "@/hooks/use-toast";
+
+export function useVisits(search?: string, status?: 'checked_in' | 'checked_out' | 'all') {
+  return useQuery({
+    queryKey: [api.visits.list.path, search, status],
+    queryFn: async () => {
+      // Build query params
+      const params = new URLSearchParams();
+      if (search) params.append("search", search);
+      if (status && status !== 'all') params.append("status", status);
+
+      const url = `${api.visits.list.path}?${params.toString()}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Failed to fetch visits");
+      return api.visits.list.responses[200].parse(await res.json());
+    },
+  });
+}
+
+export function useVisit(id: number) {
+  return useQuery({
+    queryKey: [api.visits.get.path, id],
+    queryFn: async () => {
+      const url = buildUrl(api.visits.get.path, { id });
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Failed to fetch visit");
+      return api.visits.get.responses[200].parse(await res.json());
+    },
+    enabled: !!id,
+  });
+}
+
+export function useCreateVisit() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (data: InsertVisit) => {
+      const res = await fetch(api.visits.create.path, {
+        method: api.visits.create.method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to create visit");
+      }
+      return api.visits.create.responses[201].parse(await res.json());
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.visits.list.path] });
+      toast({
+        title: "Success",
+        description: "Visitor checked in successfully",
+        variant: "default",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+export function useCheckoutVisit() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const url = buildUrl(api.visits.checkout.path, { id });
+      const res = await fetch(url, { method: api.visits.checkout.method });
+      if (!res.ok) throw new Error("Failed to checkout visitor");
+      return api.visits.checkout.responses[200].parse(await res.json());
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.visits.list.path] });
+      toast({
+        title: "Checked Out",
+        description: "Visitor has been successfully checked out",
+      });
+    },
+  });
+}
+
+export function useDeleteVisit() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const url = buildUrl(api.visits.delete.path, { id });
+      const res = await fetch(url, { method: api.visits.delete.method });
+      if (!res.ok) throw new Error("Failed to delete record");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.visits.list.path] });
+      toast({
+        title: "Deleted",
+        description: "Visitor record deleted",
+      });
+    },
+  });
+}
+
+export function useScanRfid() {
+  const { toast } = useToast();
+  
+  return useMutation({
+    mutationFn: async (rfid: string) => {
+      const res = await fetch(api.visits.scanRfid.path, {
+        method: api.visits.scanRfid.method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rfid }),
+      });
+      if (!res.ok) {
+        if (res.status === 404) throw new Error("RFID card not found in system");
+        throw new Error("Scan failed");
+      }
+      return api.visits.scanRfid.responses[200].parse(await res.json());
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Scan Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+}
