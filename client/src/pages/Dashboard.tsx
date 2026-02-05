@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { useVisits, useCheckoutVisit, useDeleteVisit } from "@/hooks/use-visits";
 import { format } from "date-fns";
-import { Search, LogOut, Trash2, QrCode, BadgeCheck, Clock, User, Building2 } from "lucide-react";
+import { Search, LogOut, Trash2, QrCode, BadgeCheck, Clock, User, Building2, Eye, Phone, MapPin, Tag } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger 
 } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
+import { QRCodeSVG } from "qrcode.react";
 
 export default function Dashboard() {
   const [search, setSearch] = useState("");
@@ -147,14 +148,106 @@ export default function Dashboard() {
                       <div className="flex items-center justify-end gap-2">
                         <Dialog>
                           <DialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-primary hover:bg-orange-50">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-primary hover:bg-orange-50" title="Detail Pengunjung">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-md p-0 overflow-hidden border-none rounded-2xl">
+                            <div className="bg-primary p-6 text-white">
+                              <DialogHeader>
+                                <DialogTitle className="text-white text-xl font-bold flex items-center gap-2">
+                                  <User className="h-5 w-5" /> Detail Pengunjung
+                                </DialogTitle>
+                              </DialogHeader>
+                            </div>
+                            <div className="p-6 space-y-6 bg-white">
+                              <div className="flex flex-col md:flex-row gap-6">
+                                <div className="flex-shrink-0">
+                                  <div className="h-32 w-32 rounded-2xl bg-orange-50 border-2 border-orange-100 flex items-center justify-center overflow-hidden shadow-inner">
+                                    {visit.photoUrl ? (
+                                      <img src={visit.photoUrl} alt={visit.fullName} className="h-full w-full object-cover" />
+                                    ) : (
+                                      <User className="h-12 w-12 text-orange-200" />
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="flex-1 space-y-3">
+                                  <div>
+                                    <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Nama Lengkap</h4>
+                                    <p className="text-lg font-bold text-gray-900">{visit.fullName}</p>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+                                        <Phone className="h-3 w-3" /> Telepon
+                                      </h4>
+                                      <p className="text-sm font-medium text-gray-700">{visit.phoneNumber}</p>
+                                    </div>
+                                    <div>
+                                      <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+                                        <Tag className="h-3 w-3" /> RFID
+                                      </h4>
+                                      <p className="text-sm font-mono text-gray-700">{visit.rfidCardId || "-"}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-100">
+                                <div className="space-y-4">
+                                  <div className="space-y-1">
+                                    <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+                                      <MapPin className="h-3 w-3" /> Alamat / Perusahaan
+                                    </h4>
+                                    <p className="text-sm text-gray-700 font-medium">{visit.address || "-"}</p>
+                                  </div>
+                                  <div className="space-y-1">
+                                    <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Bertemu Dengan</h4>
+                                    <p className="text-sm text-gray-700 font-medium">{visit.meetingWith}</p>
+                                  </div>
+                                  <div className="space-y-1">
+                                    <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Keperluan</h4>
+                                    <p className="text-sm text-gray-700 font-medium">{visit.purpose}</p>
+                                  </div>
+                                </div>
+
+                                <div className="flex flex-col items-center justify-center bg-gray-50 rounded-2xl p-4 border border-gray-100">
+                                  <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Visitor QR Pass</h4>
+                                  <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+                                    <QRCodeSVG 
+                                      value={JSON.stringify({ id: visit.id, name: visit.fullName, rfid: visit.rfidCardId })} 
+                                      size={120}
+                                      level="H"
+                                    />
+                                  </div>
+                                  <p className="text-[10px] font-mono text-gray-400 mt-2 uppercase">ID: {visit.id}</p>
+                                </div>
+                              </div>
+
+                              <div className="pt-4 flex justify-between items-center text-xs text-gray-400">
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-3 w-3" /> In: {format(new Date(visit.checkInTime), "dd MMM yyyy, HH:mm")}
+                                </div>
+                                {visit.checkOutTime && (
+                                  <div className="flex items-center gap-1">
+                                    <Clock className="h-3 w-3" /> Out: {format(new Date(visit.checkOutTime), "dd MMM yyyy, HH:mm")}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-primary hover:bg-orange-50" title="Visitor Pass">
                               <QrCode className="h-4 w-4" />
                             </Button>
                           </DialogTrigger>
                           <DialogContent className="sm:max-w-xs p-6 text-center flex flex-col items-center">
                             <h3 className="font-bold text-lg mb-4">Visitor Pass</h3>
                             <div className="bg-white p-4 rounded-xl border-2 border-dashed border-gray-300">
-                               <QrCode className="h-32 w-32 text-gray-900" />
+                               <QRCodeSVG value={JSON.stringify({ id: visit.id, name: visit.fullName })} size={128} />
                             </div>
                             <p className="text-sm text-gray-500 mt-4">{visit.fullName}</p>
                             <p className="font-mono text-xs text-gray-400">{visit.id}</p>
