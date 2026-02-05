@@ -19,7 +19,7 @@ export async function registerRoutes(
 
   // Get single visit
   app.get(api.visits.get.path, async (req, res) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const visit = await storage.getVisit(id);
     if (!visit) {
       return res.status(404).json({ message: "Visit not found" });
@@ -54,7 +54,7 @@ export async function registerRoutes(
 
   // Update visit
   app.patch(api.visits.update.path, async (req, res) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const updates = req.body;
     
     // Parse dates if present
@@ -72,7 +72,7 @@ export async function registerRoutes(
 
   // Checkout (Shortcut)
   app.post(api.visits.checkout.path, async (req, res) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     try {
       const updated = await storage.updateVisit(id, {
         status: 'checked_out',
@@ -86,7 +86,7 @@ export async function registerRoutes(
 
   // Delete visit
   app.delete(api.visits.delete.path, async (req, res) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     await storage.deleteVisit(id);
     res.status(204).send();
   });

@@ -112,6 +112,7 @@ export function useDeleteVisit() {
 }
 
 export function useScanRfid() {
+  const queryClient = useQueryClient();
   const { toast } = useToast();
   
   return useMutation({
@@ -126,6 +127,15 @@ export function useScanRfid() {
         throw new Error("Scan failed");
       }
       return api.visits.scanRfid.responses[200].parse(await res.json());
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: [api.visits.list.path] });
+      if (data.message && data.message.includes("Checked out")) {
+        toast({
+          title: "Checked Out",
+          description: data.message,
+        });
+      }
     },
     onError: (error: Error) => {
       toast({
