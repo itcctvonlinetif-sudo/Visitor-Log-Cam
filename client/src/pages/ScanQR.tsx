@@ -15,32 +15,38 @@ export default function ScanQR() {
     let html5QrCode: Html5Qrcode | null = null;
 
     if (isScanning && !scanResult) {
-      html5QrCode = new Html5Qrcode("reader");
-      const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+      // Small delay to ensure the DOM element is rendered before starting the scanner
+      const timer = setTimeout(() => {
+        const element = document.getElementById("reader");
+        if (element) {
+          html5QrCode = new Html5Qrcode("reader");
+          const config = { fps: 10, qrbox: { width: 250, height: 250 } };
 
-      html5QrCode.start(
-        { facingMode: "environment" },
-        config,
-        (decodedText) => {
-          // In this app, QR code content is the same as RFID ID (visit ID or custom ID)
-          handleScan(decodedText);
-          if (html5QrCode) {
-            html5QrCode.stop().catch(console.error);
+          html5QrCode.start(
+            { facingMode: "environment" },
+            config,
+            (decodedText) => {
+              handleScan(decodedText);
+              if (html5QrCode) {
+                html5QrCode.stop().catch(console.error);
+                setIsScanning(false);
+              }
+            },
+            () => {} 
+          ).catch((err) => {
+            console.error("Error starting QR scanner:", err);
             setIsScanning(false);
-          }
-        },
-        () => {} // silent failure for scanning frames
-      ).catch((err) => {
-        console.error("Error starting QR scanner:", err);
-        setIsScanning(false);
-      });
-    }
+          });
+        }
+      }, 100);
 
-    return () => {
-      if (html5QrCode && html5QrCode.isScanning) {
-        html5QrCode.stop().catch(console.error);
-      }
-    };
+      return () => {
+        clearTimeout(timer);
+        if (html5QrCode && html5QrCode.isScanning) {
+          html5QrCode.stop().catch(console.error);
+        }
+      };
+    }
   }, [isScanning, scanResult]);
 
   const handleScan = (data: string) => {
