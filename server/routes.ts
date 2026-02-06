@@ -111,12 +111,20 @@ export async function registerRoutes(
         status: 'checked_out',
         checkOutTime: new Date()
       });
-      return res.json({ success: true, visit: updated, message: `Checked out ${visit.fullName}` });
+      return res.json({ success: true, visit: updated, message: `Berhasil Check-out: ${visit.fullName}` });
     }
 
-    // If previously visited but currently checked out, just return info so frontend can use it?
-    // Or just say "Card free"
-    return res.json({ success: true, visit: visit, message: "Card scanned" });
+    if (visit && visit.status === 'checked_out') {
+      return res.status(400).json({ 
+        success: false, 
+        message: `Kartu ini (${rfid}) sudah melakukan Check-out. Silakan registrasi ulang untuk kunjungan baru.` 
+      });
+    }
+
+    return res.status(404).json({ 
+      success: false, 
+      message: "Kartu tidak terdaftar atau tidak ada kunjungan aktif." 
+    });
   });
 
   return httpServer;

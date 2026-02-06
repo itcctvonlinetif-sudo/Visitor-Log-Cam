@@ -126,11 +126,13 @@ export function useScanRfid() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rfid }),
       });
+      
+      const data = await res.json();
+      
       if (!res.ok) {
-        if (res.status === 404) throw new Error("RFID card not found in system");
-        throw new Error("Scan failed");
+        throw new Error(data.message || "Scan gagal");
       }
-      return api.visits.scanRfid.responses[200].parse(await res.json());
+      return api.visits.scanRfid.responses[200].parse(data);
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: [api.visits.list.path] });
