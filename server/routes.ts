@@ -127,5 +127,17 @@ export async function registerRoutes(
     });
   });
 
+  // Database backup (JSON)
+  app.get("/api/backup", async (_req, res) => {
+    try {
+      const visits = await storage.getVisits();
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', 'attachment; filename=backup.json');
+      res.json(visits);
+    } catch (e) {
+      res.status(500).json({ message: "Backup failed" });
+    }
+  });
+
   return httpServer;
 }

@@ -56,7 +56,7 @@ export default function ExportImport() {
     }
   };
 
-  const exportPDF = () => {
+  const exportPDF = async () => {
     if (!visits || visits.length === 0) {
       toast({ title: "No data", description: "Belum ada data untuk di-export", variant: "destructive" });
       return;
@@ -71,6 +71,7 @@ export default function ExportImport() {
 
       const tableData = visits.map((v, i) => [
         i + 1,
+        "", // Placeholder for photo
         v.fullName,
         v.purpose,
         v.meetingWith,
@@ -81,15 +82,55 @@ export default function ExportImport() {
 
       doc.autoTable({
         startY: 30,
-        head: [["#", "Nama", "Keperluan", "Bertemu", "Masuk", "Keluar", "Status"]],
+        head: [["#", "Foto", "Nama", "Keperluan", "Bertemu", "Masuk", "Keluar", "Status"]],
         body: tableData,
         headStyles: { fillColor: [249, 115, 22] }, // Orange primary
+        didDrawCell: (data: any) => {
+          if (data.column.index === 1 && data.cell.section === "body") {
+            const visit = visits[data.row.index];
+            if (visit.photoUrl) {
+              try {
+                doc.addImage(visit.photoUrl, "JPEG", data.cell.x + 2, data.cell.y + 2, 10, 10);
+              } catch (e) {
+                console.error("Failed to add image to PDF", e);
+              }
+            }
+          }
+        },
+        columnStyles: {
+          1: { cellWidth: 15, minCellHeight: 15 }
+        },
+        styles: {
+          valign: "middle"
+        }
       });
 
       doc.save(`Laporan_Pengunjung_${format(new Date(), "yyyy-MM-dd")}.pdf`);
       toast({ title: "Success", description: "Laporan PDF berhasil diunduh" });
     } catch (err) {
+      console.error(err);
       toast({ title: "Export Failed", description: "Gagal membuat file PDF", variant: "destructive" });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleBackup = async () => {
+    setIsExporting(true);
+    try {
+      const res = await fetch("/api/backup");
+      if (!res.ok) throw new Error("Backup failed");
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `backup_visitor_system_${format(new Date(), "yyyy-MM-dd_HHmm")}.json`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      toast({ title: "Backup Berhasil", description: "Data sistem berhasil dicadangkan" });
+    } catch (err) {
+      toast({ title: "Backup Gagal", description: "Gagal melakukan pencadangan data", variant: "destructive" });
     } finally {
       setIsExporting(false);
     }
@@ -199,20 +240,25 @@ export default function ExportImport() {
         </Card>
 
         {/* Database Backup */}
-        <Card className="hover:shadow-md transition-all duration-300 border-gray-200 rounded-2xl overflow-hidden opacity-60">
+        <Card className="hover:shadow-md transition-all duration-300 border-gray-200 rounded-2xl overflow-hidden">
           <CardHeader className="bg-blue-50/50 pb-4">
              <div className="bg-blue-100 w-12 h-12 rounded-xl flex items-center justify-center mb-2">
               <Database className="h-6 w-6 text-blue-600" />
             </div>
             <CardTitle className="text-lg">Database Backup</CardTitle>
-            <CardDescription>Full system backup SQL dump</CardDescription>
+            <CardDescription>Full system backup (JSON format)</CardDescription>
           </CardHeader>
           <CardContent className="pt-4">
-            <p className="text-sm text-gray-500 italic">Fitur ini akan segera tersedia untuk pencadangan sistem.</p>
+            <p className="text-sm text-gray-500 italic">Cadangkan seluruh data kunjungan ke dalam file JSON.</p>
           </CardContent>
           <CardFooter>
-            <Button disabled className="w-full bg-gray-50 border border-gray-200 text-gray-400 rounded-xl cursor-not-allowed">
-              <FileDown className="mr-2 h-4 w-4" /> Backup SQL
+            <Button 
+              onClick={handleBackup}
+              disabled={isExporting}
+              className="w-full bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 rounded-xl"
+            >
+              {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
+              Backup Data
             </Button>
           </CardFooter>
         </Card>
