@@ -82,8 +82,11 @@ export function useCheckoutVisit() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.visits.list.path] });
-      // Also invalidate with specific filters if they exist
-      queryClient.refetchQueries({ queryKey: [api.visits.list.path] });
+      // Force immediate refetch of all list queries
+      queryClient.refetchQueries({ 
+        queryKey: [api.visits.list.path],
+        type: 'active'
+      });
       toast({
         title: "Checked Out",
         description: "Visitor has been successfully checked out",
@@ -131,6 +134,11 @@ export function useScanRfid() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: [api.visits.list.path] });
+      // Force immediate refetch of all list queries to ensure all tabs update
+      queryClient.refetchQueries({ 
+        queryKey: [api.visits.list.path],
+        type: 'active'
+      });
       if (data.message && data.message.includes("Checked out")) {
         toast({
           title: "Checked Out",
