@@ -64,36 +64,50 @@ export default function ExportImport() {
 
     setIsExporting(true);
     try {
-      const doc = new jsPDF();
+      // Create jsPDF using constructor that works with both ESM and CJS
+      const doc = new (jsPDF as any)();
+      
       doc.text("Laporan Data Pengunjung", 14, 15);
       doc.setFontSize(10);
       doc.text(`Tanggal Cetak: ${format(new Date(), "dd MMMM yyyy, HH:mm")}`, 14, 22);
 
       const tableData = visits.map((v, i) => [
         i + 1,
-        v.fullName,
-        v.purpose,
-        v.meetingWith,
-        format(new Date(v.checkInTime), "HH:mm"),
+        v.fullName || "-",
+        v.purpose || "-",
+        v.meetingWith || "-",
+        v.checkInTime ? format(new Date(v.checkInTime), "HH:mm") : "-",
         v.checkOutTime ? format(new Date(v.checkOutTime), "HH:mm") : "-",
         v.status === "checked_in" ? "Masuk" : "Keluar"
       ]);
 
-      doc.autoTable({
-        startY: 30,
-        head: [["#", "Nama", "Keperluan", "Bertemu", "Masuk", "Keluar", "Status"]],
-        body: tableData,
-        headStyles: { fillColor: [249, 115, 22] }, // Orange primary
-        styles: {
-          valign: "middle"
-        }
-      });
+      // Use the autoTable function directly if available or from the doc instance
+      const autoTable = (doc as any).autoTable || (jsPDF as any).autoTable;
+      
+      if (typeof autoTable === "function") {
+        autoTable.call(doc, {
+          startY: 30,
+          head: [["#", "Nama", "Keperluan", "Bertemu", "Masuk", "Keluar", "Status"]],
+          body: tableData,
+          headStyles: { fillColor: [249, 115, 22] },
+          styles: { valign: "middle" }
+        });
+      } else {
+        // Fallback for different plugin versions
+        (doc as any).autoTable({
+          startY: 30,
+          head: [["#", "Nama", "Keperluan", "Bertemu", "Masuk", "Keluar", "Status"]],
+          body: tableData,
+          headStyles: { fillColor: [249, 115, 22] },
+          styles: { valign: "middle" }
+        });
+      }
 
       doc.save(`Laporan_Pengunjung_${format(new Date(), "yyyy-MM-dd")}.pdf`);
       toast({ title: "Success", description: "Laporan PDF berhasil diunduh" });
     } catch (err) {
-      console.error(err);
-      toast({ title: "Export Failed", description: "Gagal membuat file PDF", variant: "destructive" });
+      console.error("PDF generation failed:", err);
+      toast({ title: "Export Failed", description: "Gagal membuat file PDF. Silakan coba lagi.", variant: "destructive" });
     } finally {
       setIsExporting(false);
     }
