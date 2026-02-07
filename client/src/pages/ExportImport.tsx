@@ -88,8 +88,9 @@ export default function ExportImport() {
         didDrawCell: (data: any) => {
           if (data.column.index === 1 && data.cell.section === "body") {
             const visit = visits[data.row.index];
-            if (visit.photoUrl) {
+            if (visit.photoUrl && visit.photoUrl.startsWith("data:image")) {
               try {
+                // Ensure photoUrl is valid data URL
                 doc.addImage(visit.photoUrl, "JPEG", data.cell.x + 2, data.cell.y + 2, 10, 10);
               } catch (e) {
                 console.error("Failed to add image to PDF", e);
