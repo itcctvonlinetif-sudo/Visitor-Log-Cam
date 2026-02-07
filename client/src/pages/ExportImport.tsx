@@ -71,7 +71,6 @@ export default function ExportImport() {
 
       const tableData = visits.map((v, i) => [
         i + 1,
-        "", // Placeholder for photo
         v.fullName,
         v.purpose,
         v.meetingWith,
@@ -82,25 +81,9 @@ export default function ExportImport() {
 
       doc.autoTable({
         startY: 30,
-        head: [["#", "Foto", "Nama", "Keperluan", "Bertemu", "Masuk", "Keluar", "Status"]],
+        head: [["#", "Nama", "Keperluan", "Bertemu", "Masuk", "Keluar", "Status"]],
         body: tableData,
         headStyles: { fillColor: [249, 115, 22] }, // Orange primary
-        didDrawCell: (data: any) => {
-          if (data.column.index === 1 && data.cell.section === "body") {
-            const visit = visits[data.row.index];
-            if (visit.photoUrl && visit.photoUrl.startsWith("data:image")) {
-              try {
-                // Ensure photoUrl is valid data URL
-                doc.addImage(visit.photoUrl, "JPEG", data.cell.x + 2, data.cell.y + 2, 10, 10);
-              } catch (e) {
-                console.error("Failed to add image to PDF", e);
-              }
-            }
-          }
-        },
-        columnStyles: {
-          1: { cellWidth: 15, minCellHeight: 15 }
-        },
         styles: {
           valign: "middle"
         }
