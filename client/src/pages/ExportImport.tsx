@@ -64,50 +64,52 @@ export default function ExportImport() {
 
     setIsExporting(true);
     try {
-      // Create jsPDF using constructor that works with both ESM and CJS
-      const doc = new (jsPDF as any)();
+      // Use the standard constructor which is most reliable
+      const doc = new jsPDF();
       
-      doc.text("Laporan Data Pengunjung", 14, 15);
+      // Basic Header
+      doc.setFontSize(18);
+      doc.text("Laporan Data Pengunjung", 14, 20);
       doc.setFontSize(10);
-      doc.text(`Tanggal Cetak: ${format(new Date(), "dd MMMM yyyy, HH:mm")}`, 14, 22);
+      doc.text(`Tanggal Cetak: ${format(new Date(), "dd MMMM yyyy, HH:mm")}`, 14, 28);
 
-      const tableData = visits.map((v, i) => [
-        i + 1,
-        v.fullName || "-",
-        v.purpose || "-",
-        v.meetingWith || "-",
+      // Map data with extreme safety
+      const body = (visits || []).map((v, i) => [
+        (i + 1).toString(),
+        (v.fullName || "-").toString(),
+        (v.purpose || "-").toString(),
+        (v.meetingWith || "-").toString(),
         v.checkInTime ? format(new Date(v.checkInTime), "HH:mm") : "-",
         v.checkOutTime ? format(new Date(v.checkOutTime), "HH:mm") : "-",
         v.status === "checked_in" ? "Masuk" : "Keluar"
       ]);
 
-      // Use the autoTable function directly if available or from the doc instance
-      const autoTable = (doc as any).autoTable || (jsPDF as any).autoTable;
-      
-      if (typeof autoTable === "function") {
-        autoTable.call(doc, {
-          startY: 30,
-          head: [["#", "Nama", "Keperluan", "Bertemu", "Masuk", "Keluar", "Status"]],
-          body: tableData,
-          headStyles: { fillColor: [249, 115, 22] },
-          styles: { valign: "middle" }
-        });
+      // Call autoTable using the direct import reference if possible, 
+      // otherwise use the instance method which is injected by the import
+      const options = {
+        startY: 35,
+        head: [["#", "Nama", "Keperluan", "Bertemu", "Masuk", "Keluar", "Status"]],
+        body: body,
+        headStyles: { fillColor: [249, 115, 22] }, // shadcn orange-500 approx
+        styles: { fontSize: 8, cellPadding: 2 },
+        margin: { top: 35 }
+      };
+
+      if (typeof (doc as any).autoTable === 'function') {
+        (doc as any).autoTable(options);
       } else {
-        // Fallback for different plugin versions
-        (doc as any).autoTable({
-          startY: 30,
-          head: [["#", "Nama", "Keperluan", "Bertemu", "Masuk", "Keluar", "Status"]],
-          body: tableData,
-          headStyles: { fillColor: [249, 115, 22] },
-          styles: { valign: "middle" }
-        });
+        throw new Error("Plugin autoTable tidak terinisialisasi dengan benar");
       }
 
       doc.save(`Laporan_Pengunjung_${format(new Date(), "yyyy-MM-dd")}.pdf`);
-      toast({ title: "Success", description: "Laporan PDF berhasil diunduh" });
-    } catch (err) {
-      console.error("PDF generation failed:", err);
-      toast({ title: "Export Failed", description: "Gagal membuat file PDF. Silakan coba lagi.", variant: "destructive" });
+      toast({ title: "Berhasil", description: "Laporan PDF telah diunduh" });
+    } catch (err: any) {
+      console.error("PDF Export Critical Error:", err);
+      toast({ 
+        title: "Ekspor Gagal", 
+        description: `Gagal membuat PDF: ${err.message || "Kesalahan sistem"}`, 
+        variant: "destructive" 
+      });
     } finally {
       setIsExporting(false);
     }
