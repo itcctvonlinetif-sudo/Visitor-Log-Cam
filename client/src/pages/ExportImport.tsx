@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Button } from "@/components/ui/button";
 import { useVisits, useCreateVisit } from "@/hooks/use-visits";
 import { jsPDF } from "jspdf";
-import "jspdf-autotable";
+import autoTable, { UserOptions } from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { format } from "date-fns";
 import { useState, useRef } from "react";
@@ -74,7 +74,7 @@ export default function ExportImport() {
       doc.text(`Tanggal Cetak: ${format(new Date(), "dd MMMM yyyy, HH:mm")}`, 14, 28);
 
       // Map data with extreme safety
-      const body = (visits || []).map((v, i) => [
+      const body: string[][] = (visits || []).map((v, i) => [
         (i + 1).toString(),
         (v.fullName || "-").toString(),
         (v.purpose || "-").toString(),
@@ -84,22 +84,17 @@ export default function ExportImport() {
         v.status === "checked_in" ? "Masuk" : "Keluar"
       ]);
 
-      // Call autoTable using the direct import reference if possible, 
-      // otherwise use the instance method which is injected by the import
-      const options = {
+      // Call autoTable using the imported function
+      const options: UserOptions = {
         startY: 35,
         head: [["#", "Nama", "Keperluan", "Bertemu", "Masuk", "Keluar", "Status"]],
         body: body,
-        headStyles: { fillColor: [249, 115, 22] }, // shadcn orange-500 approx
+        headStyles: { fillColor: [249, 115, 22] as [number, number, number] }, // shadcn orange-500 approx
         styles: { fontSize: 8, cellPadding: 2 },
         margin: { top: 35 }
       };
 
-      if (typeof (doc as any).autoTable === 'function') {
-        (doc as any).autoTable(options);
-      } else {
-        throw new Error("Plugin autoTable tidak terinisialisasi dengan benar");
-      }
+      autoTable(doc, options);
 
       doc.save(`Laporan_Pengunjung_${format(new Date(), "yyyy-MM-dd")}.pdf`);
       toast({ title: "Berhasil", description: "Laporan PDF telah diunduh" });
