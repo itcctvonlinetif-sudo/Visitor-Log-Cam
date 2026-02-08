@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, lt } from "drizzle-orm";
 import { visits, type Visit, type InsertVisit } from "@shared/schema";
 
 export interface IStorage {
@@ -8,6 +8,7 @@ export interface IStorage {
   createVisit(visit: InsertVisit): Promise<Visit>;
   updateVisit(id: number, visit: Partial<InsertVisit> & { status?: string, checkOutTime?: Date }): Promise<Visit>;
   deleteVisit(id: number): Promise<void>;
+  deleteVisitsByRange(range: "week" | "month" | "year"): Promise<number>;
   findVisitByRfid(rfid: string): Promise<Visit | undefined>;
 }
 
@@ -42,6 +43,23 @@ export class DatabaseStorage implements IStorage {
 
   async deleteVisit(id: number): Promise<void> {
     await db.delete(visits).where(eq(visits.id, id));
+  }
+
+  async deleteVisitsByRange(range: "week" | "month" | "year"): Promise<number> {
+    const now = new Date();
+    let cutoff = new Date();
+
+    if (range === "week") {
+      cutoff.setDate(now.getDate() - 7);
+    } else if (range === "month") {
+      cutoff.setMonth(now.getMonth() - 1);
+    } else if (range === "year") {
+      cutoff.setFullYear(now.getFullYear() - 1);
+    }
+
+    // Drizzle delete with where condition for checkInTime < cutoff
+    const result = await db.delete(visits).where(lt(visits.checkInTime, cutoff)).returning();
+    return result.length;
   }
 
   async findVisitByRfid(rfid: string): Promise<Visit | undefined> {

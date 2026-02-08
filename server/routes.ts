@@ -139,5 +139,19 @@ export async function registerRoutes(
     }
   });
 
+  // Delete visits by range
+  app.delete("/api/visits/purge/:range", async (req, res) => {
+    const range = req.params.range as "week" | "month" | "year";
+    if (!["week", "month", "year"].includes(range)) {
+      return res.status(400).json({ message: "Invalid range" });
+    }
+    try {
+      const deletedCount = await storage.deleteVisitsByRange(range);
+      res.json({ message: `Berhasil menghapus ${deletedCount} data pengunjung`, count: deletedCount });
+    } catch (e) {
+      res.status(500).json({ message: "Gagal menghapus data" });
+    }
+  });
+
   return httpServer;
 }

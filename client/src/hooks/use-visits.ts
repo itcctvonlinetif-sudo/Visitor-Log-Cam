@@ -95,21 +95,28 @@ export function useCheckoutVisit() {
   });
 }
 
-export function useDeleteVisit() {
+export function useDeleteVisitsByRange() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (id: number) => {
-      const url = buildUrl(api.visits.delete.path, { id });
-      const res = await fetch(url, { method: api.visits.delete.method });
-      if (!res.ok) throw new Error("Failed to delete record");
+    mutationFn: async (range: "week" | "month" | "year") => {
+      const res = await fetch(`/api/visits/purge/${range}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Gagal menghapus data");
+      return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: [api.visits.list.path] });
       toast({
-        title: "Deleted",
-        description: "Visitor record deleted",
+        title: "Data Berhasil Dihapus",
+        description: data.message,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Gagal Menghapus",
+        description: error.message,
+        variant: "destructive",
       });
     },
   });

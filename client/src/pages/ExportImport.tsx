@@ -1,13 +1,24 @@
-import { FileDown, FileUp, Database, FileSpreadsheet, FileText, Loader2, Check, AlertCircle } from "lucide-react";
+import { FileDown, FileUp, Database, FileSpreadsheet, FileText, Loader2, Check, AlertCircle, Trash2 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useVisits, useCreateVisit } from "@/hooks/use-visits";
+import { useVisits, useCreateVisit, useDeleteVisitsByRange } from "@/hooks/use-visits";
 import { jsPDF } from "jspdf";
 import autoTable, { UserOptions } from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { format } from "date-fns";
 import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 declare module "jspdf" {
   interface jsPDF {
@@ -19,9 +30,17 @@ export default function ExportImport() {
   const { data: visits } = useVisits();
   const { toast } = useToast();
   const createVisit = useCreateVisit();
+  const deleteByRange = useDeleteVisitsByRange();
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [rangeToDelete, setRangeToDelete] = useState<"week" | "month" | "year" | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDelete = async () => {
+    if (!rangeToDelete) return;
+    await deleteByRange.mutateAsync(rangeToDelete);
+    setRangeToDelete(null);
+  };
 
   const exportExcel = () => {
     if (!visits || visits.length === 0) {
@@ -256,6 +275,93 @@ export default function ExportImport() {
               Backup Data
             </Button>
           </CardFooter>
+        </Card>
+
+        {/* Delete Data Section */}
+        <Card className="hover:shadow-md transition-all duration-300 border-gray-200 rounded-2xl overflow-hidden">
+          <CardHeader className="bg-orange-50/50 pb-4">
+            <div className="bg-orange-100 w-12 h-12 rounded-xl flex items-center justify-center mb-2">
+              <Trash2 className="h-6 w-6 text-orange-600" />
+            </div>
+            <CardTitle className="text-lg">Hapus Data Lama</CardTitle>
+            <CardDescription>Bersihkan data pengunjung yang sudah lama</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4 space-y-2">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start text-red-600 border-red-100 hover:bg-red-50 hover:text-red-700 rounded-xl"
+                  onClick={() => setRangeToDelete("week")}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Hapus Data &gt; 1 Minggu
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Tindakan ini akan menghapus semua data pengunjung yang lebih lama dari 1 minggu. Data yang sudah dihapus tidak dapat dikembalikan.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel onClick={() => setRangeToDelete(null)}>Batal</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">Hapus</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start text-red-600 border-red-100 hover:bg-red-50 hover:text-red-700 rounded-xl"
+                  onClick={() => setRangeToDelete("month")}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Hapus Data &gt; 1 Bulan
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Tindakan ini akan menghapus semua data pengunjung yang lebih lama dari 1 bulan. Data yang sudah dihapus tidak dapat dikembalikan.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel onClick={() => setRangeToDelete(null)}>Batal</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">Hapus</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start text-red-600 border-red-100 hover:bg-red-50 hover:text-red-700 rounded-xl"
+                  onClick={() => setRangeToDelete("year")}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Hapus Data &gt; 1 Tahun
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Tindakan ini akan menghapus semua data pengunjung yang lebih lama dari 1 tahun. Data yang sudah dihapus tidak dapat dikembalikan.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel onClick={() => setRangeToDelete(null)}>Batal</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">Hapus</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </CardContent>
         </Card>
       </div>
 
