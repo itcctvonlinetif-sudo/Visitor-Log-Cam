@@ -127,13 +127,31 @@ export async function registerRoutes(
     });
   });
 
-  // Database backup (JSON)
+  // Database backup (SQL)
   app.get("/api/backup", async (_req, res) => {
     try {
-      const visits = await storage.getVisits();
-      res.setHeader('Content-Type', 'application/json');
-      res.setHeader('Content-Disposition', 'attachment; filename=backup.json');
-      res.json(visits);
+      const visitsData = await storage.getVisits();
+      
+      let sql = "-- Visitor Management System Backup\n";
+      sql += `-- Generated at: ${new Date().toISOString()}\n\n`;
+      sql += "INSERT INTO visits (full_name, phone_number, rfid_card_id, address, meeting_with, purpose, photo_url, status, check_in_time, check_out_time) VALUES\n";
+      
+      const escape = (val: any) => {
+        if (val === null || val === undefined) return "NULL";
+        if (typeof val === "string") return `'${val.replace(/'/g, "''")}'`;
+        if (val instanceof Date) return `'${val.toISOString()}'`;
+        return val;
+      };
+
+      const rows = visitsData.map(v => {
+        return `(${escape(v.fullName)}, ${escape(v.phoneNumber)}, ${escape(v.rfidCardId)}, ${escape(v.address)}, ${escape(v.meetingWith)}, ${escape(v.purpose)}, ${escape(v.photoUrl)}, ${escape(v.status)}, ${escape(v.checkInTime)}, ${escape(v.checkOutTime)})`;
+      });
+
+      sql += rows.join(",\n") + ";";
+
+      res.setHeader('Content-Type', 'application/sql');
+      res.setHeader('Content-Disposition', `attachment; filename=backup_${new Date().getTime()}.sql`);
+      res.send(sql);
     } catch (e) {
       res.status(500).json({ message: "Backup failed" });
     }

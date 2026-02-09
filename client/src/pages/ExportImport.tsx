@@ -138,7 +138,7 @@ export default function ExportImport() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `backup_visitor_system_${format(new Date(), "yyyy-MM-dd_HHmm")}.json`;
+      a.download = `backup_visitor_system_${format(new Date(), "yyyy-MM-dd_HHmm")}.sql`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -260,10 +260,10 @@ export default function ExportImport() {
               <Database className="h-6 w-6 text-blue-600" />
             </div>
             <CardTitle className="text-lg">Database Backup</CardTitle>
-            <CardDescription>Full system backup (JSON format)</CardDescription>
+            <CardDescription>Full system backup (SQL format)</CardDescription>
           </CardHeader>
           <CardContent className="pt-4">
-            <p className="text-sm text-gray-500 italic">Cadangkan seluruh data kunjungan ke dalam file JSON.</p>
+            <p className="text-sm text-gray-500 italic">Cadangkan seluruh data kunjungan ke dalam file SQL.</p>
           </CardContent>
           <CardFooter>
             <Button 
