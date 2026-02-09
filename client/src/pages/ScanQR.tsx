@@ -139,11 +139,17 @@ export default function ScanQR() {
              </ul>
            </div>
 
-           <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 text-blue-800">
-              <p className="text-sm font-medium">
+          <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 text-blue-800">
+              <p className="text-sm font-medium mb-3">
                 Catatan: Fitur ini memerlukan izin kamera. Jika kamera tidak muncul, periksa pengaturan browser Anda.
               </p>
-           </div>
+              <div className="text-xs space-y-1">
+                <p className="font-bold">Tips Akses HTTP:</p>
+                <p>1. Gunakan <b>localhost</b> atau <b>127.0.0.1</b></p>
+                <p>2. Jika via Replit, pastikan menggunakan <b>https://</b></p>
+                <p>3. Chrome Flags: <code className="bg-blue-100 px-1 rounded">chrome://flags/#unsafely-treat-insecure-origin-as-secure</code></p>
+              </div>
+          </div>
         </div>
       </div>
     </div>
