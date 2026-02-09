@@ -95,6 +95,26 @@ export function useCheckoutVisit() {
   });
 }
 
+export function useDeleteVisit() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const url = buildUrl(api.visits.delete.path, { id });
+      const res = await fetch(url, { method: api.visits.delete.method });
+      if (!res.ok) throw new Error("Gagal menghapus data");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.visits.list.path] });
+      toast({
+        title: "Dihapus",
+        description: "Data pengunjung berhasil dihapus",
+      });
+    },
+  });
+}
+
 export function useDeleteVisitsByRange() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
