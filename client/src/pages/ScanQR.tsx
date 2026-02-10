@@ -143,11 +143,21 @@ export default function ScanQR() {
               <p className="text-sm font-medium mb-3">
                 Catatan: Fitur ini memerlukan izin kamera. Jika kamera tidak muncul, periksa pengaturan browser Anda.
               </p>
-              <div className="text-xs space-y-1">
-                <p className="font-bold">Tips Akses HTTP:</p>
-                <p>1. Gunakan <b>localhost</b> atau <b>127.0.0.1</b></p>
-                <p>2. Jika via Replit, pastikan menggunakan <b>https://</b></p>
-                <p>3. Chrome Flags: <code className="bg-blue-100 px-1 rounded">chrome://flags/#unsafely-treat-insecure-origin-as-secure</code></p>
+              <div className="text-xs space-y-2">
+                <p className="font-bold underline">Tips Akses Kamera (HTTP):</p>
+                <div>
+                  <p className="font-semibold text-blue-900">Chrome / Edge:</p>
+                  <p>Buka <code className="bg-blue-100 px-1 rounded">chrome://flags/#unsafely-treat-insecure-origin-as-secure</code>, masukkan URL Anda, set <b>Enabled</b>, dan restart.</p>
+                </div>
+                <div>
+                  <p className="font-semibold text-blue-900">Firefox:</p>
+                  <p>Buka <code className="bg-blue-100 px-1 rounded">about:config</code>, cari <code className="bg-blue-100 px-1 rounded">media.devices.insecure.enabled</code> dan <code className="bg-blue-100 px-1 rounded">media.getusermedia.insecure.enabled</code>, set keduanya menjadi <b>true</b>.</p>
+                </div>
+                <div>
+                  <p className="font-semibold text-blue-900">Safari (Mac):</p>
+                  <p>Menu <b>Safari &gt; Settings &gt; Advanced</b>, centang <b>"Show features for web developers"</b>. Lalu di menu <b>Developer</b>, pilih <b>"Media Capture from Insecure Origins"</b>.</p>
+                </div>
+                <p className="pt-1 text-orange-700 font-medium">Rekomendasi Utama: Selalu gunakan <b>HTTPS</b> untuk kemudahan akses.</p>
               </div>
           </div>
         </div>
