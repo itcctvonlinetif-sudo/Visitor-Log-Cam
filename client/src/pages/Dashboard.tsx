@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useVisits, useCheckoutVisit, useDeleteVisit } from "@/hooks/use-visits";
 import { format } from "date-fns";
-import { Search, LogOut, Trash2, QrCode, BadgeCheck, Clock, User, Building2, Eye, Phone, MapPin, Tag } from "lucide-react";
+import { Search, LogOut, Trash2, QrCode, BadgeCheck, Clock, User, Building2, Eye, Phone, MapPin, Tag, Printer } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -161,6 +161,17 @@ export default function Dashboard() {
                               </DialogHeader>
                             </div>
                             <div className="p-6 space-y-6 bg-white">
+                              <div className="flex justify-end mb-2 no-print">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="rounded-xl gap-2"
+                                  onClick={() => window.print()}
+                                >
+                                  <Printer className="h-4 w-4" />
+                                  Cetak Detail
+                                </Button>
+                              </div>
                               <div className="flex flex-col md:flex-row gap-6">
                                 <div className="flex-shrink-0">
                                   <div className="h-32 w-32 rounded-2xl bg-orange-50 border-2 border-orange-100 flex items-center justify-center overflow-hidden shadow-inner">
@@ -246,11 +257,20 @@ export default function Dashboard() {
                           </DialogTrigger>
                           <DialogContent className="sm:max-w-xs p-6 text-center flex flex-col items-center">
                             <h3 className="font-bold text-lg mb-4">Visitor Pass</h3>
-                            <div className="bg-white p-4 rounded-xl border-2 border-dashed border-gray-300">
+                            <div className="bg-white p-4 rounded-xl border-2 border-dashed border-gray-300 print-m-0">
                                <QRCodeSVG value={JSON.stringify({ id: visit.id, name: visit.fullName })} size={128} />
                             </div>
                             <p className="text-sm text-gray-500 mt-4">{visit.fullName}</p>
                             <p className="font-mono text-xs text-gray-400">{visit.id}</p>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="mt-6 w-full rounded-xl gap-2 no-print"
+                              onClick={() => window.print()}
+                            >
+                              <Printer className="h-4 w-4" />
+                              Cetak QR Code
+                            </Button>
                           </DialogContent>
                         </Dialog>
                         
