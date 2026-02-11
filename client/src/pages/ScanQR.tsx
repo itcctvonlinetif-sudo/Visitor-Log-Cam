@@ -1,10 +1,17 @@
 import { useState, useEffect } from "react";
-import { QrCode, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { QrCode, Loader2, CheckCircle2, AlertCircle, Info, HelpCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Html5Qrcode } from "html5-qrcode";
 import { useScanRfid } from "@/hooks/use-visits";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export default function ScanQR() {
   const [isScanning, setIsScanning] = useState(false);
@@ -139,27 +146,68 @@ export default function ScanQR() {
              </ul>
            </div>
 
-          <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 text-blue-800">
-              <p className="text-sm font-medium mb-3">
-                Catatan: Fitur ini memerlukan izin kamera. Jika kamera tidak muncul, periksa pengaturan browser Anda.
-              </p>
-              <div className="text-xs space-y-2">
-                <p className="font-bold underline">Tips Akses Kamera (HTTP):</p>
-                <div>
-                  <p className="font-semibold text-blue-900">Chrome / Edge:</p>
-                  <p>Buka <code className="bg-blue-100 px-1 rounded">chrome://flags/#unsafely-treat-insecure-origin-as-secure</code>, masukkan URL Anda, set <b>Enabled</b>, dan restart.</p>
+           <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 text-blue-800">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex gap-3 items-center">
+                  <div className="bg-blue-100 p-2 rounded-full">
+                    <Info className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <p className="text-sm font-medium">
+                    Kamera tidak muncul? Periksa izin browser Anda.
+                  </p>
                 </div>
-                <div>
-                  <p className="font-semibold text-blue-900">Firefox:</p>
-                  <p>Buka <code className="bg-blue-100 px-1 rounded">about:config</code>, cari <code className="bg-blue-100 px-1 rounded">media.devices.insecure.enabled</code> dan <code className="bg-blue-100 px-1 rounded">media.getusermedia.insecure.enabled</code>, set keduanya menjadi <b>true</b>.</p>
-                </div>
-                <div>
-                  <p className="font-semibold text-blue-900">Safari (Mac):</p>
-                  <p>Menu <b>Safari &gt; Settings &gt; Advanced</b>, centang <b>"Show features for web developers"</b>. Lalu di menu <b>Developer</b>, pilih <b>"Media Capture from Insecure Origins"</b>.</p>
-                </div>
-                <p className="pt-1 text-orange-700 font-medium">Rekomendasi Utama: Selalu gunakan <b>HTTPS</b> untuk kemudahan akses.</p>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="rounded-full bg-white border-blue-200 text-blue-700 hover:bg-blue-100 shrink-0">
+                      <HelpCircle className="h-4 w-4 mr-2" />
+                      Tips Akses
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md rounded-2xl">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2">
+                        <Info className="h-5 w-5 text-blue-600" />
+                        Tips Akses Kamera (HTTP)
+                      </DialogTitle>
+                    </DialogHeader>
+                    <div className="text-sm space-y-4 pt-2">
+                      <p className="text-gray-600 leading-relaxed">
+                        Catatan: Fitur ini memerlukan izin kamera. Jika kamera tidak muncul, periksa pengaturan browser Anda.
+                      </p>
+                      
+                      <div className="space-y-4">
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                          <p className="font-semibold text-blue-900 mb-1">Chrome / Edge:</p>
+                          <p className="text-xs text-gray-600">
+                            Buka <code className="bg-blue-100 px-1 rounded break-all">chrome://flags/#unsafely-treat-insecure-origin-as-secure</code>, masukkan URL Anda, set <b>Enabled</b>, dan restart.
+                          </p>
+                        </div>
+                        
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                          <p className="font-semibold text-blue-900 mb-1">Firefox:</p>
+                          <p className="text-xs text-gray-600">
+                            Buka <code className="bg-blue-100 px-1 rounded">about:config</code>, cari <code className="bg-blue-100 px-1 rounded">media.devices.insecure.enabled</code> dan set menjadi <b>true</b>.
+                          </p>
+                        </div>
+                        
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                          <p className="font-semibold text-blue-900 mb-1">Safari (Mac):</p>
+                          <p className="text-xs text-gray-600">
+                            Menu <b>Develop &gt; WebRTC &gt; Allow Media Capture from Insecure Origins</b>.
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-orange-50 p-3 rounded-xl border border-orange-100">
+                        <p className="text-xs text-orange-700 font-medium italic">
+                          Rekomendasi Utama: Selalu gunakan <b>HTTPS</b> untuk kemudahan akses dan keamanan terbaik.
+                        </p>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
-          </div>
+           </div>
         </div>
       </div>
     </div>
