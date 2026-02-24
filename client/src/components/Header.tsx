@@ -8,8 +8,8 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 
 const MENU_ITEMS = [
-  { label: "Daftar Pengunjung", icon: LayoutDashboard, href: "/" },
-  { label: "Tambah Data", icon: UserPlus, href: "/add" },
+  { label: "Tambah Data", icon: UserPlus, href: "/" },
+  { label: "Daftar Pengunjung", icon: LayoutDashboard, href: "/dashboard" },
   { label: "Scan RFID", icon: ScanLine, href: "/scan-rfid" },
   { label: "Scan QR Code", icon: QrCode, href: "/scan-qr" },
   { label: "Export & Import", icon: FileInput, href: "/export" },

@@ -19,8 +19,8 @@ function Router() {
       <Header />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Switch>
-          <Route path="/" component={Dashboard} />
-          <Route path="/add" component={AddVisitor} />
+          <Route path="/" component={AddVisitor} />
+          <Route path="/dashboard" component={Dashboard} />
           <Route path="/scan-rfid" component={ScanRFID} />
           <Route path="/scan-qr" component={ScanQR} />
           <Route path="/export" component={ExportImport} />
