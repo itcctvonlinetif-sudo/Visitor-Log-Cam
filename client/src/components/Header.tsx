@@ -1,3 +1,4 @@
+import React from "react";
 import { Link, useLocation } from "wouter";
 import { CalendarDays, LayoutDashboard, UserPlus, ScanLine, QrCode, FileInput, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -16,6 +17,7 @@ const MENU_ITEMS = [
 
 export function Header() {
   const [location] = useLocation();
+  const [open, setOpen] = React.useState(false);
   const currentDate = format(new Date(), "EEEE, d MMMM yyyy", { locale: id });
 
   return (
@@ -67,7 +69,7 @@ export function Header() {
       {/* Mobile Menu */}
       <div className="md:hidden p-4 flex items-center justify-between border-b">
          <span className="font-semibold text-gray-700">Menu</span>
-         <Sheet>
+         <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon">
                 <Menu className="h-5 w-5" />
@@ -79,12 +81,17 @@ export function Header() {
                   const isActive = location === item.href;
                   const Icon = item.icon;
                   return (
-                    <Link key={item.href} href={item.href} className={cn(
-                      "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
-                      isActive 
-                        ? "bg-primary/10 text-primary" 
-                        : "text-gray-600 hover:bg-gray-100"
-                    )}>
+                    <Link 
+                      key={item.href} 
+                      href={item.href} 
+                      onClick={() => setOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                        isActive 
+                          ? "bg-primary/10 text-primary" 
+                          : "text-gray-600 hover:bg-gray-100"
+                      )}
+                    >
                       <Icon className="h-5 w-5" />
                       {item.label}
                     </Link>
