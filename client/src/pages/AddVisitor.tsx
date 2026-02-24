@@ -65,7 +65,24 @@ export default function AddVisitor() {
   const onSubmit = (data: FormValues) => {
     createMutation.mutate(data, {
       onSuccess: () => {
-        setLocation("/");
+        // setLocation("/");
+        form.reset({
+          fullName: "",
+          phoneNumber: "",
+          rfidCardId: "",
+          address: "",
+          meetingWith: "",
+          purpose: "",
+          photoUrl: "",
+        });
+        setImgSrc(null);
+        setIsCameraOpen(false);
+        import("@/hooks/use-toast").then(({ toast }) => {
+          toast({
+            title: "Pendaftaran Berhasil",
+            description: "Data pengunjung telah berhasil disimpan.",
+          });
+        });
       },
     });
   };

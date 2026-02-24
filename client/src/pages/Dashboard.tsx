@@ -152,16 +152,16 @@ export default function Dashboard() {
                               <Eye className="h-4 w-4" />
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="sm:max-w-md p-0 overflow-hidden border-none rounded-2xl">
-                            <div className="bg-primary p-6 text-white">
+                          <DialogContent className="w-[95vw] sm:max-w-md p-0 overflow-hidden border-none rounded-2xl max-h-[90vh] flex flex-col">
+                            <div className="bg-primary p-6 text-white shrink-0">
                               <DialogHeader>
                                 <DialogTitle className="text-white text-xl font-bold flex items-center gap-2">
                                   <User className="h-5 w-5" /> Detail Pengunjung
                                 </DialogTitle>
                               </DialogHeader>
                             </div>
-                            <div className="p-6 space-y-6 bg-white">
-                              <div className="flex justify-end mb-2 no-print">
+                            <div className="p-6 space-y-6 bg-white overflow-y-auto overflow-x-auto custom-scrollbar flex-1">
+                              <div className="flex justify-end mb-2 no-print shrink-0">
                                 <Button 
                                   variant="outline" 
                                   size="sm" 
@@ -182,7 +182,7 @@ export default function Dashboard() {
                                     )}
                                   </div>
                                 </div>
-                                <div className="flex-1 space-y-3">
+                                <div className="flex-1 space-y-3 min-w-[200px]">
                                   <div>
                                     <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Nama Lengkap</h4>
                                     <p className="text-lg font-bold text-gray-900">{visit.fullName}</p>
