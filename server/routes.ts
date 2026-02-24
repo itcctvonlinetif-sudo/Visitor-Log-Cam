@@ -13,7 +13,8 @@ export async function registerRoutes(
   // Get all visits
   app.get(api.visits.list.path, async (req, res) => {
     const status = req.query.status as string | undefined;
-    const visits = await storage.getVisits(status);
+    const search = req.query.search as string | undefined;
+    const visits = await storage.getVisits(status, search);
     res.json(visits);
   });
 

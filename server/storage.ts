@@ -1,9 +1,9 @@
 import { db } from "./db";
-import { eq, desc, lt } from "drizzle-orm";
+import { eq, desc, lt, and, sql } from "drizzle-orm";
 import { visits, type Visit, type InsertVisit } from "@shared/schema";
 
 export interface IStorage {
-  getVisits(status?: string): Promise<Visit[]>;
+  getVisits(status?: string, search?: string): Promise<Visit[]>;
   getVisit(id: number): Promise<Visit | undefined>;
   createVisit(visit: InsertVisit): Promise<Visit>;
   updateVisit(id: number, visit: Partial<InsertVisit> & { status?: string, checkOutTime?: Date }): Promise<Visit>;
@@ -13,12 +13,29 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-  async getVisits(status?: string): Promise<Visit[]> {
+  async getVisits(status?: string, search?: string): Promise<Visit[]> {
     let query = db.select().from(visits).orderBy(desc(visits.checkInTime));
+    
+    const conditions = [];
+    
     if (status && status !== 'all') {
-      // @ts-ignore - drizzle type inference issue with dynamic where
-      query = query.where(eq(visits.status, status));
+      conditions.push(eq(visits.status, status));
     }
+    
+    if (search) {
+      const searchLower = `%${search.toLowerCase()}%`;
+      conditions.push(
+        sql`lower(${visits.fullName}) LIKE ${searchLower} OR 
+            lower(${visits.address}) LIKE ${searchLower} OR 
+            lower(${visits.meetingWith}) LIKE ${searchLower}`
+      );
+    }
+
+    if (conditions.length > 0) {
+      // @ts-ignore
+      query = query.where(and(...conditions));
+    }
+    
     return await query;
   }
 
